@@ -1,4 +1,4 @@
-function sum_rate_sdma = sum_rate_sdma(H, P, Pt)
+function sum_rate_sdma = sum_rate_sdma(H, Po, Pt)
     % H: M x K channel matrix (M antennas, K users)
     % P: M x K precoding matrix (each column is a precoder for user k)
     
@@ -6,7 +6,7 @@ function sum_rate_sdma = sum_rate_sdma(H, P, Pt)
     sum_rate_sdma = 0;
     
     % Power allocation
-    P = sqrt(Pt/2)*P;
+    P = sqrt(Pt/2)*Po;
 
     for k = 1:K
         hk = H(:, k);         % Channel vector to user k (M x 1)

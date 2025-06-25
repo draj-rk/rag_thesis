@@ -1,4 +1,4 @@
-function pc = multicast_common_pre(H, P, Pt, t)
+function pc = multicast_common_pre(H, P)
     % H: M x K channel matrix (M antennas, K users)
     % P: M x K precoding matrix (each column is a precoder for user k)
     
@@ -37,7 +37,7 @@ function pc = multicast_common_pre(H, P, Pt, t)
     
     a12_phase = angle(a12);
     
-    pc_bar = mu_vec(1) * h1_tilde + mu_vec(2) * h2_tilde * exp(-1i * a12_phase);
+    pc_bar = (mu_vec(1) * h1_tilde) + (mu_vec(2) * h2_tilde * exp(-1i * a12_phase));
     
     pc = pc_bar / sqrt(lambda);
 end

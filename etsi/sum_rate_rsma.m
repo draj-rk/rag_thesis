@@ -1,6 +1,6 @@
-function rsma_rate = sum_rate_rsma(H, P, Pt)
+function rsma_rate = sum_rate_rsma(H, Po, Pt)
     % H: M x K channel matrix (M antennas, K users)
-    % P: M x K precoding matrix (each column is a precoder for user k)
+    % Po: M x K precoding matrix (each column is a precoder for user k)
     
     [M, K] = size(H);    % M antennas, K users
     sum_rate_rsma = 0;
@@ -13,13 +13,13 @@ function rsma_rate = sum_rate_rsma(H, P, Pt)
         
         t = ti(i);
         
-        % Power allocation to private precoders
-        P = sqrt(Pt*(1 - t) / 2)*P;
-        
-        p_c = multicast_common_pre(H, P, Pt, t);
+        % Compute the common precoder
+        p_c = multicast_common_pre(H, Po);
     
         % Power allocation
         p_c = sqrt(Pt*t) * p_c;
+        % Power allocation to private precoders
+        P = sqrt(Pt*(1 - t) / 2)*Po;
         
 
         % For common rates
