@@ -1,4 +1,4 @@
-function rsma_rate = sum_rate_rsma(H, Po, P_t)
+function [rsma_rate, max_r, min_r] = sum_rate_rsma(H, Po, P_t)
     % H: M x K channel matrix (M antennas, K users)
     % Po: M x K precoding matrix (each column is a precoder for user k)
     % P_t: transmit power
@@ -6,6 +6,8 @@ function rsma_rate = sum_rate_rsma(H, Po, P_t)
     [M, K] = size(H);    % M antennas, K users
     
     R_SUM_MAX = 0;
+    R1 = 0;
+    R2 = 0;
     
     ti = [0:0.01:1];
     
@@ -56,18 +58,41 @@ function rsma_rate = sum_rate_rsma(H, Po, P_t)
             end
 
             Rk = log2(1 + (signal_power / (interference + 1)));
+
+            if k == 1
+                R1 = Rk;  % Store the rate for user 1
+            else
+                R2 = Rk;  % Store the rate for user 2
+            end
+
+
             sum_rate_rsma = sum_rate_rsma + Rk;
         end
+
+        R1 + R2;
 
         sum_rate_rsma = sum_rate_rsma + Rc;
         
         if sum_rate_rsma > R_SUM_MAX
             
             R_SUM_MAX = sum_rate_rsma;
+            
+            tau = 0.5 - ((R1-R2)/(2*Rc));
+            if tau > 1
+                tau = 1;
+            elseif tau < 0
+                tau = 0;
+            end
+        
+            R_1 = R1 + (tau*Rc);
+            R_2 = R2 + ((1-tau)*Rc);
         end
         
     end
     
     rsma_rate = R_SUM_MAX;
+
+    max_r = max(R_1, R_2);
+    min_r = min(R_1, R_2);
     
 end
