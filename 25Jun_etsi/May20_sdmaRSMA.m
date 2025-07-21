@@ -6,7 +6,7 @@ clear all
 % Channels
 h1 = 1+0*1i * [1 1 1 1]';
 
-gamma = 1;
+gamma = 0.3;
 thetaN = 3;
 
 theta1 = thetaN*pi/9; % [1, 2, 3]
@@ -43,6 +43,9 @@ sdma_mrt_min = zeros(1, length(SNR));
 rs_mrt = zeros(1, length(SNR));
 rs_mrt_max = zeros(1, length(SNR));
 rs_mrt_min = zeros(1, length(SNR));
+oma_mrt = zeros(1, length(SNR));
+oma_mrt_max = zeros(1, length(SNR));
+oma_mrt_min = zeros(1, length(SNR));
 
 sdma_zf = zeros(1, length(SNR));
 sdma_zf_max = zeros(1, length(SNR));
@@ -66,6 +69,7 @@ for s = 1:length(SNR)
     % MRT precoders
     [sdma_mrt(s), sdma_mrt_max(s), sdma_mrt_min(s)] = sum_rate_sdma(H, w_mrt, snr_);
     [rs_mrt(s), rs_mrt_max(s), rs_mrt_min(s)] = sum_rate_rsma(H, w_mrt, snr_);
+    [oma_mrt(s), oma_mrt_max(s), oma_mrt_min(s)] = sum_rate_oma(H, w_mrt, snr_);
     
     % ZF precoders
     [sdma_zf(s), sdma_zf_max(s), sdma_zf_min(s)] = sum_rate_sdma(H, w_zf, snr_);
@@ -81,24 +85,25 @@ for s = 1:length(SNR)
 
 end
 
-figure
-plot(SNR, sdma_mrt,'ro-');
-hold on
-plot(SNR, rs_mrt,'bo-');
-hold on
-plot(SNR, sdma_zf,'r^-');
-hold on
-plot(SNR, rs_zf,'b^-');
-hold on
-plot(SNR, sdma_mm,'r--');
-hold on
-plot(SNR, rs_mm,'b--');
-
-xlabel('SNR (dB)')
-ylabel('Sum Rate (bits/s/Hz)')
-legend('SDMA - MRT', 'RSMA - MRT', 'SDMA - ZF', 'RSMA - ZF', 'SDMA - MMSE', 'RSMA - MMSE')
-grid on
-title('Sum Rate vs. SNR')
+%%
+% figure
+% plot(SNR, sdma_mrt,'ro-');
+% hold on
+% plot(SNR, rs_mrt,'bo-');
+% hold on
+% plot(SNR, sdma_zf,'r^-');
+% hold on
+% plot(SNR, rs_zf,'b^-');
+% hold on
+% plot(SNR, sdma_mm,'r--');
+% hold on
+% plot(SNR, rs_mm,'b--');
+% 
+% xlabel('SNR (dB)')
+% ylabel('Sum Rate (bits/s/Hz)')
+% legend('SDMA - MRT', 'RSMA - MRT', 'SDMA - ZF', 'RSMA - ZF', 'SDMA - MMSE', 'RSMA - MMSE')
+% grid on
+% title('Sum Rate vs. SNR')
 
 %% 
 % Gain of RSMA over SDMA
@@ -127,7 +132,60 @@ xlabel('SNR (dB)')
 ylabel('Sum Rate Gain')
 legend('MRT', 'ZF', 'MMSE')
 grid on
-title(sprintf('Sum Rate Gain \\gamma = %.1f, \\theta = %d\\pi/9', gamma, thetaN))
+title(sprintf('Gain RSMA over SDMA \\gamma = %.1f, \\theta = %d\\pi/9', gamma, thetaN))
+
+subplot(1,3,2);
+plot(SNR, gain_mrt_min,'ro-');
+hold on
+plot(SNR, gain_zf_min,'bo-');
+hold on
+plot(SNR, gain_mm_min,'m--');
+
+xlabel('SNR (dB)')
+ylabel('Weak user-rate gain')
+legend('MRT', 'ZF', 'MMSE')
+grid on
+
+subplot(1,3,3);
+plot(SNR, gain_mrt_max,'ro-');
+hold on
+plot(SNR, gain_zf_max,'bo-');
+hold on
+plot(SNR, gain_mm_max,'m--');
+
+xlabel('SNR (dB)')
+ylabel('Strong user-rate gain')
+legend('MRT', 'ZF', 'MMSE')
+grid on
+
+%%
+% Gain of SDMA over OMA
+gain_mrt = (sdma_mrt - 1*oma_mrt)./oma_mrt*100;
+gain_mrt_max = (sdma_mrt_max - 1*oma_mrt_max)./oma_mrt_max*100;
+gain_mrt_min = (sdma_mrt_min - 1*oma_mrt_min)./oma_mrt_min*100;
+
+gain_zf = (sdma_zf - 1*oma_mrt)./oma_mrt*100;
+gain_zf_max = (sdma_zf_max - 1*oma_mrt_max)./oma_mrt_max*100;
+gain_zf_min = (sdma_zf_min - 1*oma_mrt_min)./oma_mrt_min*100;
+
+gain_mm = (sdma_mm - 1*oma_mrt)./oma_mrt*100;
+gain_mm_max = (sdma_mm_max - 1*oma_mrt_max)./oma_mrt_max*100;
+gain_mm_min = (sdma_mm_min - 1*oma_mrt_min)./oma_mrt_min*100;
+
+%%
+figure
+subplot(1,3,1);
+plot(SNR, gain_mrt,'ro-');
+hold on
+plot(SNR, gain_zf,'bo-');
+hold on
+plot(SNR, gain_mm,'m--');
+
+xlabel('SNR (dB)')
+ylabel('Sum Rate Gain')
+legend('MRT', 'ZF', 'MMSE')
+grid on
+title(sprintf('Gain of SDMA over OMA \\gamma = %.1f, \\theta = %d\\pi/9', gamma, thetaN))
 
 subplot(1,3,2);
 plot(SNR, gain_mrt_min,'ro-');
